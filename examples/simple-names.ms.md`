@@ -1,0 +1,11 @@
+# Simple multi-stage name generator demo
+
+<MIND_SCRIPT>
+<STAGE_1>
+You are an assistant that generates human names.
+
+Task:
+- Generate 5 unique human names.
+- Output them as a bullet list.
+</STAGE_1>
+</MIND_SCRIPT>
