@@ -1,0 +1,68 @@
+# 3.1-parser.py
+"""
+Simple MindScript parser.
+
+This does NOT implement the full language.
+It handles a basic tag pattern like:
+
+<MIND_SCRIPT>
+    <STAGE_1>
+        ...
+    </STAGE_1>
+    <STAGE_2>
+        ...
+    </STAGE_2>
+</MIND_SCRIPT>
+"""
+
+from __future__ import annotations
+from dataclasses import dataclass
+from typing import List, Optional
+
+
+@dataclass
+class StageNode:
+    name: str
+    content: str
+
+
+@dataclass
+class MindScriptProgram:
+    stages: List[StageNode]
+
+
+def parse_mindscript(text: str) -> MindScriptProgram:
+    """
+    Very simple stage-based parser.
+    Looks for <STAGE_X> ... </STAGE_X> blocks.
+    """
+    stages: List[StageNode] = []
+
+    lines = text.splitlines()
+    current_name: Optional[str] = None
+    buffer: List[str] = []
+
+    def flush_stage():
+        nonlocal stages, current_name, buffer
+        if current_name is not None:
+            content = "\n".join(buffer).strip()
+            stages.append(StageNode(name=current_name, content=content))
+            current_name = None
+            buffer = []
+
+    for line in lines:
+        stripped = line.strip()
+        if stripped.startswith("<STAGE_") and stripped.endswith(">"):
+            # new stage start
+            flush_stage()
+            current_name = stripped.lstrip("<").rstrip(">")
+            buffer = []
+        elif stripped.startswith("</STAGE_") and stripped.endswith(">"):
+            # stage end
+            flush_stage()
+        else:
+            if current_name is not None:
+                buffer.append(line)
+
+    flush_stage()
+    return MindScriptProgram(stages=stages)
